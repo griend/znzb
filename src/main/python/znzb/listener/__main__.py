@@ -84,13 +84,15 @@ def markets_callback(response):
         Session = sessionmaker(bind=engine)
         session = Session()
         for market in response:
-            old = session.query(Market).filter_by(market=market['market'])
+            old = session.query(Market).filter_by(market=market['market']).first()
 
             if old:
+                logger.info(f'Update market: {market["market"]}')
                 tmp = old
             else:
                 tmp = Market()
                 session.add(tmp)
+                logger.info(f'Insert market: {market["market"]}')
 
             tmp.market = market['market']
             tmp.status = market['status']
@@ -126,7 +128,7 @@ def candle_1m_callback(response):
         session = Session()
         timestamp = int(response['candle'][0][0] / 1000)
         market_id = market_id_cache[response['market']]
-        old = session.query(Candle_1m).filter_by(timestamp=timestamp, market_id=market_id)
+        old = session.query(Candle_1m).filter_by(timestamp=timestamp, market_id=market_id).first()
 
         if old:
             tmp = old
@@ -134,6 +136,8 @@ def candle_1m_callback(response):
             tmp = Candle_1m()
             session.add(tmp)
 
+        tmp.timestamp = timestamp
+        tmp.market_id = market_id
         tmp.open = float(response['candle'][0][1])
         tmp.high = float(response['candle'][0][2])
         tmp.low = float(response['candle'][0][3])
@@ -152,7 +156,7 @@ def candle_5m_callback(response):
         session = Session()
         timestamp = int(response['candle'][0][0] / 1000)
         market_id = market_id_cache[response['market']]
-        old = session.query(Candle_5m).filter_by(timestamp=timestamp, market_id=market_id)
+        old = session.query(Candle_5m).filter_by(timestamp=timestamp, market_id=market_id).first()
 
         if old:
             tmp = old
@@ -160,6 +164,8 @@ def candle_5m_callback(response):
             tmp = Candle_5m()
             session.add(tmp)
 
+        tmp.timestamp = timestamp
+        tmp.market_id = market_id
         tmp.open = float(response['candle'][0][1])
         tmp.high = float(response['candle'][0][2])
         tmp.low = float(response['candle'][0][3])
@@ -178,7 +184,7 @@ def candle_1h_callback(response):
         session = Session()
         timestamp = int(response['candle'][0][0] / 1000)
         market_id = market_id_cache[response['market']]
-        old = session.query(Candle_1h).filter_by(timestamp=timestamp, market_id=market_id)
+        old = session.query(Candle_1h).filter_by(timestamp=timestamp, market_id=market_id).first()
 
         if old:
             tmp = old
@@ -186,6 +192,8 @@ def candle_1h_callback(response):
             tmp = Candle_1h()
             session.add(tmp)
 
+        tmp.timestamp = timestamp
+        tmp.market_id = market_id
         tmp.open = float(response['candle'][0][1])
         tmp.high = float(response['candle'][0][2])
         tmp.low = float(response['candle'][0][3])
@@ -204,14 +212,15 @@ def candle_1d_callback(response):
         session = Session()
         timestamp = int(response['candle'][0][0] / 1000)
         market_id = market_id_cache[response['market']]
-        old = session.query(Candle_1d).filter_by(timestamp=timestamp, market_id=market_id)
+        old = session.query(Candle_1d).filter_by(timestamp=timestamp, market_id=market_id).first()
 
         if old:
             tmp = old
         else:
             tmp = Candle_1d()
             session.add(tmp)
-
+        tmp.timestamp = timestamp
+        tmp.market_id = market_id
         tmp.open = float(response['candle'][0][1])
         tmp.high = float(response['candle'][0][2])
         tmp.low = float(response['candle'][0][3])
