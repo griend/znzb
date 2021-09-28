@@ -1,14 +1,31 @@
-import datetime
 import os
+from contextlib import contextmanager
 
 from sqlalchemy import Column, Integer, Float, String, create_engine, PrimaryKeyConstraint, ForeignKey
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 from ..config import Config
 
-Base = declarative_base()
-
 config = Config()
+Base = declarative_base()
+db_filename = os.path.join(config.db_dir, 'listener.db')
+engine = create_engine(f'sqlite:///{db_filename}', connect_args={"check_same_thread": False}, echo=False)
+Session = sessionmaker(bind=engine)
+
+
+@contextmanager
+def session_scope():
+    """Provide a transactional scope around a series of operations."""
+    session = Session()
+    try:
+        yield session
+        session.commit()
+    except:
+        session.rollback()
+        raise
+    finally:
+        session.close()
+
 
 class Market(Base):
     __tablename__ = 'markets'
