@@ -4,7 +4,7 @@ Description=Zanzibar Listener Service
 [Service]
 Type=simple
 Environment=PYTHONPATH=/home/cees/prj/znzb/src/main/python
-ExecStart=/home/cees/prj/znzb/src/main/pythonvenv/bin/python3 -m znzb.listener
+ExecStart=/home/cees/prj/znzb/src/main/python/venv/bin/python3 -m znzb.listener
 Restart=always
 RestartSec=1s
 
