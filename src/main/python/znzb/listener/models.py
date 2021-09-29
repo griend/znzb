@@ -1,30 +1,20 @@
+import logging
 import os
 from contextlib import contextmanager
 
 from sqlalchemy import Column, Integer, Float, String, create_engine, PrimaryKeyConstraint, ForeignKey
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-from ..config import Config
+from ..config import config
+from ..common import init_logging
 
-config = Config()
-Base = declarative_base()
+
+logger = logging.getLogger(__name__)
 db_filename = os.path.join(config.db_dir, 'listener.db')
 engine = create_engine(f'sqlite:///{db_filename}', connect_args={"check_same_thread": False}, echo=False)
+
+Base = declarative_base()
 Session = sessionmaker(bind=engine)
-
-
-@contextmanager
-def session_scope():
-    """Provide a transactional scope around a series of operations."""
-    session = Session()
-    try:
-        yield session
-        session.commit()
-    except:
-        session.rollback()
-        raise
-    finally:
-        session.close()
 
 
 class Market(Base):
@@ -39,8 +29,6 @@ class Market(Base):
     minOrderInQuoteAsset = Column(Float, nullable=False)
     minOrderInBaseAsset = Column(Float, nullable=False)
     orderTypes = Column(String, nullable=False)
-    # created = Column(TIMESTAMP, default=datetime.datetime.utcnow, nullable=False)
-    # updated = Column(TIMESTAMP, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow, nullable=False)
 
 
 class Candle_1m(Base):
@@ -53,8 +41,6 @@ class Candle_1m(Base):
     low = Column(Float, nullable=False)
     close = Column(Float, nullable=False)
     volume = Column(Float, nullable=False)
-    # created = Column(TIMESTAMP, default=datetime.datetime.utcnow, nullable=False)
-    # updated = Column(TIMESTAMP, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow, nullable=False)
 
     __table_args__ = (
         PrimaryKeyConstraint(timestamp, market_id),
@@ -109,21 +95,32 @@ class Candle_1d(Base):
     )
 
 
-def get_engine():
-    db_filename = os.path.join(config.db_dir, 'listener.db')
-    engine = create_engine(f'sqlite:///{db_filename}')
+@contextmanager
+def session_scope():
+    session = Session()
+    try:
+        yield session
+        session.commit()
+    except Exception as e:
+        session.rollback()
+        logger.exception(e)
+        raise
+    finally:
+        session.close()
 
-    return engine
 
+def create_all():
+    logger.info(f'create_all() - Start, PID: {os.getpid()}')
 
-def get_Session():
-    engine = get_engine()
-    Session = sessionmaker(bind=engine)
+    Base.metadata.create_all(engine)
 
-    return Session
+    logger.info(f'create_all() - Finish, PID: {os.getpid()}')
 
 
 if __name__ == '__main__':
-    engine = get_engine()
+    init_logging('listener-models.log')
 
-    Base.metadata.create_all(engine)
+    try:
+        create_all()
+    except Exception as e:
+        logger.fatal(e, exc_info=True)

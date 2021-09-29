@@ -1,0 +1,10 @@
+[Unit]
+Description=Zanzibar Listener Backup Timer
+Requires=zanzibar-listener-backup.service
+
+[Timer]
+Requires=zanzibar-listener-backup.service
+OnCalendar=*-*-* 01:45:00
+
+[Install]
+WantedBy=timers.target

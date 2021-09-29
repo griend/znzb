@@ -1,0 +1,10 @@
+[Unit]
+Description=Zanzibar Listener Backup Service
+
+[Service]
+Type=oneshot
+Environment=PYTHONPATH=/home/cees/prj/znzb/src/main/python
+ExecStart=/home/cees/prj/znzb/src/main/python/venv/bin/python3 -m znzb.listener.backup
+
+[Install]
+WantedBy=default.target

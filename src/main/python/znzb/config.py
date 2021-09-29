@@ -2,8 +2,8 @@ import configparser
 import os
 import pathlib
 
-class Config:
 
+class Config:
     def __init__(self):
         self.base_dir = os.path.join(pathlib.Path.home(), 'var', 'zanzibar')
         self.db_dir = os.path.join(self.base_dir, 'db')
@@ -39,9 +39,10 @@ class Config:
             if not os.path.isdir(d):
                 os.makedirs(d)
 
+config = Config()
 
 if __name__ == '__main__':
-    config = Config()
+
     print(config.tmp_dir)
 
     if os.path.isdir(config.tmp_dir):

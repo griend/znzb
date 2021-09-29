@@ -9,49 +9,14 @@ import time
 from python_bitvavo_api.bitvavo import Bitvavo
 
 from .models import Market, Candle_1m, Candle_5m, Candle_1h, Candle_1d, session_scope
-from ..config import Config
+from ..config import config
+from ..common import init_logging
 
 logger = logging.getLogger(__name__)
-config = Config()
 running = True
 
 
-def init_logging(log_filename: str = 'listener.log') -> None:
-    """
-    Configure the logging.
-
-    :param log_filename:
-    """
-    format = logging.Formatter('%(asctime)s %(name)s %(levelname)s - %(message)s')
-    filename = os.path.join(config.log_dir, log_filename)
-    fh = logging.handlers.TimedRotatingFileHandler(filename=filename, when="midnight", backupCount=30)
-    fh.setFormatter(format)
-    fh.setLevel(logging.DEBUG)
-    console = logging.StreamHandler()
-    console.setFormatter(format)
-
-    if sys.stdout.isatty():
-        console.setLevel(logging.INFO)
-    else:
-        console.setLevel(logging.FATAL)
-
-    logger = logging.getLogger()
-    logger.setLevel(logging.INFO)
-
-    for handler in logger.handlers[:]:
-        logger.removeHandler(handler)
-
-    logger.addHandler(fh)
-    logger.addHandler(console)
-
-
 def signal_handler(signal, *args):
-    """
-
-    :param signal:
-    :param args:
-    :return:
-    """
     global running
     running = False
     logger.info(f'Caught signal: {signal}')
@@ -209,8 +174,9 @@ def main():
 
 
 if __name__ == '__main__':
+    init_logging()
+
     try:
-        init_logging()
         main()
     except Exception as e:
         logger.fatal(e, exc_info=True)
