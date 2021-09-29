@@ -3,6 +3,7 @@ import logging.handlers
 import os
 import sqlite3
 
+from . import __version__
 from ..common import init_logging
 from ..config import config
 
@@ -15,7 +16,8 @@ def progress(status, remaining, total):
 
 
 def backup():
-    logger.info(f'backup() - Start, PID: {os.getpid()}')
+    logger.info(f'backup() - Start ({__version__})')
+    logger.info(f'PID: {os.getpid()}')
 
     yesterday = datetime.date.today() - datetime.timedelta(days=1)
     backup_filename = os.path.join(config.db_dir, f'listener-{yesterday:%Y%m%d}.db')

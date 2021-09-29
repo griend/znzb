@@ -1,15 +1,14 @@
 import datetime
 import logging
-import logging.handlers
 import os
 import signal
-import sys
 import time
 
 from python_bitvavo_api.bitvavo import Bitvavo
 
+from . import __version__
 from .models import Market, Candle_1m, Candle_5m, Candle_1h, Candle_1d, session_scope
-from ..config import config
+# from ..config import config
 from ..common import init_logging
 
 logger = logging.getLogger(__name__)
@@ -141,7 +140,9 @@ def candle_1d_callback(response):
 
 
 def main():
-    logger.info(f'main() - Start, PID: {os.getpid()}')
+    logger.info(f'main()- Start ({__version__})')
+    logger.info(f'PID: {os.getpid()}')
+
     signal.signal(signal.SIGTERM, signal_handler)
 
     bitvavo = Bitvavo()

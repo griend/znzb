@@ -5,9 +5,9 @@ from contextlib import contextmanager
 from sqlalchemy import Column, Integer, Float, String, create_engine, PrimaryKeyConstraint, ForeignKey
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-from ..config import config
+from . import __version__
 from ..common import init_logging
-
+from ..config import config
 
 logger = logging.getLogger(__name__)
 db_filename = os.path.join(config.db_dir, 'listener.db')
@@ -110,11 +110,12 @@ def session_scope():
 
 
 def create_all():
-    logger.info(f'create_all() - Start, PID: {os.getpid()}')
+    logger.info(f'create_all() - Start ({__version__})')
+    logger.info(f'PID: {os.getpid()}')
 
     Base.metadata.create_all(engine)
 
-    logger.info(f'create_all() - Finish, PID: {os.getpid()}')
+    logger.info(f'create_all() - Finish')
 
 
 if __name__ == '__main__':
