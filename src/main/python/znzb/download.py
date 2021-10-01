@@ -20,7 +20,7 @@ def download(hostname):
     logger.info(f'PID: {os.getpid()}')
 
     yesterday = datetime.date.today() - datetime.timedelta(days=1)
-    backup_filename = f'listener-{yesterday:%Y%m%d}.db'
+    backup_filename = f'zanzibar-{yesterday:%Y%m%d}.db'
     local_filename = os.path.join(config.db_dir, backup_filename)
 
     if os.path.isfile(local_filename):
