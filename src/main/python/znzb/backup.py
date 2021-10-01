@@ -1,14 +1,17 @@
+"""
+Creates a backup of the Zanzibar SQLite database
+"""
 import datetime
 import logging.handlers
 import os
 import sqlite3
 
-from . import __version__
-from ..common import init_logging
-from ..config import config
+from znzb import __version__
+from znzb.common import init_logging
+from znzb.config import config
+from znzb.models import db_filename
 
 logger = logging.getLogger(__name__)
-db_filename = os.path.join(config.db_dir, 'listener.db')
 
 
 def progress(status, remaining, total):
@@ -20,7 +23,7 @@ def backup():
     logger.info(f'PID: {os.getpid()}')
 
     yesterday = datetime.date.today() - datetime.timedelta(days=1)
-    backup_filename = os.path.join(config.db_dir, f'listener-{yesterday:%Y%m%d}.db')
+    backup_filename = os.path.join(config.db_dir, f'zanzibar-{yesterday:%Y%m%d}.db')
 
     logger.info(f'Backup source: {db_filename}')
     logger.info(f'Backup destination: {backup_filename}')

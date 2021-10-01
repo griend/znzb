@@ -1,16 +1,17 @@
 import logging
 import os
+import shutil
 from contextlib import contextmanager
 
 from sqlalchemy import Column, Integer, Float, String, create_engine, PrimaryKeyConstraint, ForeignKey
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-from . import __version__
-from ..common import init_logging
-from ..config import config
+from znzb.common import init_logging
+from znzb.config import config
+from znzb.listener import __version__
 
 logger = logging.getLogger(__name__)
-db_filename = os.path.join(config.db_dir, 'listener.db')
+db_filename = os.path.join(config.db_dir, 'zanzibar.db')
 engine = create_engine(f'sqlite:///{db_filename}', connect_args={"check_same_thread": False}, echo=False)
 
 Base = declarative_base()
@@ -118,10 +119,40 @@ def create_all():
     logger.info(f'create_all() - Finish')
 
 
+def migrate():
+    logger.info(f'migrate()- Start ({__version__})')
+    logger.info(f'PID: {os.getpid()}')
+
+    old_db_filename = os.path.join(config.db_dir, 'listener.db')
+    new_db_filename = db_filename
+
+    if not os.path.isfile(new_db_filename):
+        logger.info(f'New DB does not exist: {new_db_filename}')
+
+        if not os.path.isfile(old_db_filename):
+            logger.fatal(f'Old DB does not exist: {old_db_filename}')
+            raise FileNotFoundError(old_db_filename)
+
+        shutil.copy(old_db_filename, new_db_filename)
+
+        logger.info(f'Copied DB: {old_db_filename} to {new_db_filename}')
+
+    # sanity check
+    if os.path.isfile(new_db_filename):
+        logger.info(f'DB does exist: {new_db_filename}')
+        Base.metadata.create_all(engine)
+    else:
+        logger.fatal(f'DB does not exist: {new_db_filename}')
+        raise FileNotFoundError(new_db_filename)
+
+    logger.info(f'migrate() - Finish')
+
+
 if __name__ == '__main__':
-    init_logging('listener-models.log')
+    init_logging('models.log')
 
     try:
-        create_all()
+        migrate()
+        # create_all()
     except Exception as e:
         logger.fatal(e, exc_info=True)

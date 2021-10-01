@@ -3,7 +3,7 @@ Description=Zanzibar Backup Timer
 Requires=zanzibar-backup.service
 
 [Timer]
-Requires=zanzibar-listener-backup.service
+Requires=zanzibar-backup.service
 OnCalendar=*-*-* 01:45:00
 
 [Install]

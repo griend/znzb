@@ -6,10 +6,9 @@ import time
 
 from python_bitvavo_api.bitvavo import Bitvavo
 
-from . import __version__
-from .models import Market, Candle_1m, Candle_5m, Candle_1h, Candle_1d, session_scope
-# from ..config import config
-from ..common import init_logging
+from znzb.common import init_logging
+from znzb.listener import __version__
+from znzb.models import Market, Candle_1m, Candle_5m, Candle_1h, Candle_1d, session_scope, migrate
 
 logger = logging.getLogger(__name__)
 running = True
@@ -175,9 +174,10 @@ def main():
 
 
 if __name__ == '__main__':
-    init_logging()
+    init_logging('listener.log')
 
     try:
+        migrate()
         main()
     except Exception as e:
         logger.fatal(e, exc_info=True)

@@ -1,3 +1,6 @@
+"""
+Download Zanzibar SQLite database.
+"""
 import datetime
 import fnmatch
 import logging.handlers
@@ -5,9 +8,9 @@ import os
 
 import paramiko
 
-from . import __version__
-from ..common import init_logging
-from ..config import config
+from znzb import __version__
+from znzb.common import init_logging
+from znzb.config import config
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +41,7 @@ def download(hostname):
         sftp = ssh.open_sftp()
         sftp.chdir('var/zanzibar/db')
         for file in sftp.listdir():
-            if fnmatch.fnmatch(file, 'listener-????????.db'):
+            if fnmatch.fnmatch(file, 'zanzibar-????????.db'):
                 logger.debug(f'backup file: {file}')
                 if file == backup_filename:
                     sftp.get(file, local_filename)
@@ -59,6 +62,6 @@ if __name__ == '__main__':
     transport.setLevel(logging.WARNING)
 
     try:
-        download('asrv0000019')
+        download(config.sftp_hostname)
     except Exception as e:
         logger.fatal(e, exc_info=True)

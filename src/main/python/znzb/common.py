@@ -3,7 +3,7 @@ import logging.handlers
 import os
 import sys
 
-from .config import config
+from znzb.config import config
 
 
 def init_logging(log_filename: str = 'listener-backup.log') -> None:

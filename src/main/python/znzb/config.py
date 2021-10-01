@@ -11,12 +11,10 @@ class Config:
         self.log_dir = os.path.join(self.base_dir, 'log')
         self.tmp_dir = os.path.join(self.base_dir, 'tmp')
 
-        #
-        # ./zanzibar.ini
-        # /opt/zanzibar/etc/zanzibar.ini
-        # ~/var/zanzibar/etc/zanzibar.ini
-        # ~/.zanzibar.ini
-        #
+        # 1: ./zanzibar.ini
+        # 2: /opt/zanzibar/etc/zanzibar.ini
+        # 3: ~/var/zanzibar/etc/zanzibar.ini
+        # 4: ~/.zanzibar.ini
         files = [
             os.path.join(os.path.dirname(__file__), 'zanzibar.ini'),
             os.path.join('opt', 'zanzibar', 'etc', 'zanzibar.ini'),
