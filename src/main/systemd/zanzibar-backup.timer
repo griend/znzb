@@ -1,9 +1,8 @@
 [Unit]
 Description=Zanzibar Backup Timer
-Requires=zanzibar-backup.service
 
 [Timer]
-Requires=zanzibar-backup.service
+Unit=zanzibar-backup.service
 OnCalendar=*-*-* 01:45:00
 
 [Install]

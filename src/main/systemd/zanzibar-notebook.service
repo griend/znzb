@@ -1,0 +1,11 @@
+[Unit]
+Description=Zanzibar Jupyter Notebook
+
+[Service]
+Type=simple
+ExecStart=/home/cees/.local/bin/jupyter notebook --notebook-dir=/home/cees/prj/znzb/src/main/notebook --no-browser --port 8889
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

@@ -5,9 +5,9 @@ import zoneinfo
 
 from python_bitvavo_api.bitvavo import Bitvavo
 
-from . import __version__
-from ..common import init_logging
-from ..config import config
+from znzb.trader import __version__
+from znzb.common import init_logging
+from znzb.config import config
 
 logger = logging.getLogger(__name__)
 
