@@ -96,6 +96,38 @@ class Candle_1d(Base):
     )
 
 
+class HistoricalUpdate(Base):
+    __tablename__ = 'historical_updates'
+
+    market_id = Column(Integer, ForeignKey(Market.id), nullable=False)
+    type = Column(String, nullable=False)
+    status = Column(String, nullable=False)
+    started = Column(Integer)
+    ended = Column(Integer)
+    updated = Column(Integer)
+
+    __table_args__ = (
+        PrimaryKeyConstraint(market_id, type),
+    )
+
+
+
+class Historical_1m(Base):
+    __tablename__ = 'historical_1m'
+
+    timestamp = Column(Integer, nullable=False)
+    market_id = Column(Integer, ForeignKey(Market.id), nullable=False)
+    open = Column(Float, nullable=False)
+    high = Column(Float, nullable=False)
+    low = Column(Float, nullable=False)
+    close = Column(Float, nullable=False)
+    volume = Column(Float, nullable=False)
+
+    __table_args__ = (
+        PrimaryKeyConstraint(timestamp, market_id),
+    )
+
+
 @contextmanager
 def session_scope():
     session = Session()

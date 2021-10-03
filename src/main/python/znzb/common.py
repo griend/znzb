@@ -6,12 +6,14 @@ import sys
 from znzb.config import config
 
 
-def init_logging(log_filename: str = 'listener-backup.log') -> None:
+def init_logging(log_filename: str = None):
     format = logging.Formatter('%(asctime)s %(name)s %(levelname)s - %(message)s')
-    filename = os.path.join(config.log_dir, log_filename)
-    fh = logging.handlers.TimedRotatingFileHandler(filename=filename, when="midnight", backupCount=30)
-    fh.setFormatter(format)
-    fh.setLevel(logging.DEBUG)
+    if log_filename:
+        filename = os.path.join(config.log_dir, log_filename)
+        fh = logging.handlers.TimedRotatingFileHandler(filename=filename, when="midnight", backupCount=30)
+        fh.setFormatter(format)
+        fh.setLevel(logging.DEBUG)
+
     console = logging.StreamHandler()
     console.setFormatter(format)
 
@@ -26,5 +28,7 @@ def init_logging(log_filename: str = 'listener-backup.log') -> None:
     for handler in logger.handlers[:]:
         logger.removeHandler(handler)
 
-    logger.addHandler(fh)
+    if log_filename:
+        logger.addHandler(fh)
+
     logger.addHandler(console)

@@ -1,6 +1,14 @@
+"""
+from python_bitvavo_api.bitvavo import Bitvavo
+
+bitvavo = Bitvavo('<APIKEY>', '<APISECRET>')
+response = bitvavo.placeOrder('BTC-EUR', 'sell', 'limit', { 'amount': '0.1', 'price': '5000' })
+print(response)
+"""
 import datetime
 import logging
 import os
+import sys
 import zoneinfo
 
 from python_bitvavo_api.bitvavo import Bitvavo
@@ -92,30 +100,40 @@ def get_btc(bitvavo: Bitvavo) -> float:
     return amount
 
 
-def check():
-    logger.info(f'check() - Start ({__version__})')
+def sell(market):
+    logger.info(f'sell({market}) - Start ({__version__})')
     logger.info(f'PID: {os.getpid()}')
 
-    bitvavo = connect()
-    time = get_time(bitvavo)
-    # get_assets(bitvavo)
-    get_balance(bitvavo)
-    eur = get_eur(bitvavo)
-    btc = get_btc(bitvavo)
-    price_btc = get_price_btc(bitvavo)
+    coin, currency = market.split('-')
+    logger.info(f'{coin =}, {currency =}')
 
-    logger.info(f'Bitvavo Time: {time:%Y-%m-%d %H:%M:%S}')
-    logger.info(f'Balance EUR: € {eur:.02f}')
-    logger.info(f'Balance BTC: € {btc * price_btc:.02f} = ₿ {btc:.09f} * {price_btc:.02f}')
-    logger.info(f'Total: € {eur + btc * price_btc:.02f}')
+    connection = connect()
 
-    logger.info(f'check() - Finish')
+    response = connection.balance({'symbol': 'BTC'})
+    amount = float(response[0]['available'])
+
+    logger.info(f'Available: {amount} {coin}')
+
+    MIN_ORDERS = 0.0001
+
+    if amount > MIN_ORDERS:
+        logger.info(f'Selling: {MIN_ORDERS} {coin}')
+        response = connection.placeOrder('BTC-EUR', 'sell', 'market', {'amount': f'{MIN_ORDERS}'})
+        logger.info(response)
+
+    logger.info(f'sell({market}) - Finish')
 
 
 if __name__ == '__main__':
-    init_logging('trader-check.log')
+    init_logging('trader-sell.log')
 
     try:
-        check()
+        if len(sys.argv) > 1:
+            market = sys.argv[1]
+            sell(market)
+        else:
+            msg = f'ERROR: market is missing on the command line'
+            print(msg)
+            logger.error(msg)
     except Exception as e:
         logger.fatal(e, exc_info=True)

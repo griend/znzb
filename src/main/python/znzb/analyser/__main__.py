@@ -81,7 +81,7 @@ def main(market):
     logger.info(f'PID: {os.getpid()}')
 
     yesterday = datetime.date.today() - datetime.timedelta(days=1)
-    db_filename = os.path.join(config.db_dir, f'listener-{yesterday:%Y%m%d}.db')
+    db_filename = os.path.join(config.db_dir, f'zanzibar-{yesterday:%Y%m%d}.db')
 
     if not os.path.isfile(db_filename):
         logger.error(f'Datebase does not exist: {db_filename}')
