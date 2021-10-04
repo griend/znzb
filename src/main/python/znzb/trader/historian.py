@@ -3,9 +3,6 @@ import logging
 import os
 import time
 
-import numpy
-import talib
-
 from python_bitvavo_api.bitvavo import Bitvavo
 
 from znzb.trader import __version__
@@ -38,6 +35,8 @@ def populate_markets():
 
     connection = connect()
     response = connection.markets({})
+    if 'error' in response:
+        raise Exception(response)
 
     with session_scope() as session:
         for market in response:
@@ -114,6 +113,9 @@ def populate_historical_1m():
             # print(f'{market=} {start_dt=}')
 
             response = connection.candles(market, '1m', {'start': start_ms, 'end': end_ms})
+            if 'error' in response:
+                raise Exception(response)
+
             reverse = response[::-1]
             for candle in reverse:
                 timestamp = int(candle[0] / 1000)

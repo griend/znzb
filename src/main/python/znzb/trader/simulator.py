@@ -28,7 +28,7 @@ def analyse(connection, market, dt):
     cursor = connection.cursor()
     cursor.execute('''
       SELECT c.close
-        FROM candles_1m c
+        FROM historical_1m c
         JOIN markets m
           ON m.id = c.market_id
        WHERE c.timestamp <=:ts
@@ -45,11 +45,16 @@ def analyse(connection, market, dt):
 
     cursor.close()
 
-    data = numpy.array(closes[::-1])
-    rsi = talib.RSI(data)[-1]
+    if len(closes) == 15:
+        data = numpy.array(closes[::-1])
+        rsi = talib.RSI(data)[-1]
+        price = closes[1]
+    else:
+        price = 0
+        rsi = 50.0
 
     logger.debug(f'analyse({market}, {dt}) - Finish')
-    return rsi, closes[1]
+    return rsi, price
 
 
 def buy(price):
@@ -71,8 +76,8 @@ def sell(price):
     global expense
 
     bank = coin * price
-    expense += bank * 0.0025
-    bank -= bank * 0.0025
+    expense += bank * 0.0020
+    bank -= bank * 0.0020
     coin = 0
 
     return False
@@ -83,7 +88,7 @@ def simulate(market):
     logger.info(f'PID: {os.getpid()}')
 
     yesterday = datetime.date.today() - datetime.timedelta(1)
-    start_dt = datetime.datetime(2021, 9, 28, 20, 30, 0)
+    start_dt = datetime.datetime(2000, 1, 1, 0, 0, 0)
     end_dt = datetime.datetime(yesterday.year, yesterday.month, yesterday.day, 23, 59, 59)
     start_epoch = int(start_dt.timestamp())
     end_epoch = int(end_dt.timestamp())
@@ -102,11 +107,11 @@ def simulate(market):
             buy_price = price
             logger.info(f'{dt} {rsi:.02f} -  Buy {price:.02f} - Bank: {bank:8.02f} / Coin: {coin}')
         elif in_position and rsi > 70:
-            if price > buy_price * 1.0125:
+            if price > buy_price * 1.02:
                 in_position = sell(price)
                 logger.info(f'{dt} {rsi:.02f} - Sell {price:.02f} - Bank: {bank:8.02f} / Coin: {coin}')
         # else:
-        #     logger.info(f'{dt} {rsi:.02f}')
+            # logger.info(f'{dt} {rsi:.02f}')
 
     logger.info(f'Bank: {bank:.02f}, coin: {coin}, expense: {expense:.02f}')
     logger.info(f'Total: {bank + coin * price:.02f}')
