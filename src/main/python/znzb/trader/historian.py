@@ -2,15 +2,36 @@ import datetime
 import logging
 import os
 import time
+from contextlib import contextmanager
 
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 from python_bitvavo_api.bitvavo import Bitvavo
 
 from znzb.trader import __version__
 from znzb.common import init_logging
 from znzb.config import config
-from znzb.models import session_scope, Market, HistoricalUpdate, Historical_1m
+from znzb.models import Base, Market, HistoricalUpdate, Historical_1m
 
 logger = logging.getLogger(__name__)
+
+db_filename = os.path.join(config.db_dir, 'zanzibar-historical.db')
+engine = create_engine(f'sqlite:///{db_filename}', connect_args={"check_same_thread": False}, echo=False)
+Session = sessionmaker(bind=engine)
+
+
+@contextmanager
+def session_scope():
+    session = Session()
+    try:
+        yield session
+        session.commit()
+    except Exception as e:
+        session.rollback()
+        logger.exception(e)
+        raise
+    finally:
+        session.close()
 
 
 def connect() -> Bitvavo:
@@ -149,12 +170,18 @@ def historian():
     logger.info(f'historian() - Start ({__version__})')
     logger.info(f'PID: {os.getpid()}')
 
+
+    Base.metadata.create_all(engine)
+
     populate_markets()
     populate_historical_updates()
 
-    for n in range(365 * 2):
+    start_date = datetime.date(2020, 1, 1)
+    end_date = datetime.date.today()
+
+    for n in range(end_date - start_date):
         populate_historical_1m()
-        time.sleep(60)
+        time.sleep(120)
 
     logger.info(f'historian() - Finish')
 
